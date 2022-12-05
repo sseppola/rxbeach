@@ -17,6 +17,7 @@ import {
 import { defaultErrorSubject } from './internal/defaultErrorSubject';
 import { ofType } from './operators/operators';
 import { isObservableInput } from './isObservableInput';
+import { rxBeachConfig } from './config';
 
 const wrapInArray = <T>(val: T | T[]): T[] =>
   Array.isArray(val) ? val : [val];
@@ -254,16 +255,30 @@ export const combineReducers = <State>(
         try {
           if (packet.origin === ACTION_ORIGIN) {
             const reducerFn = reducersByActionType.get(packet.value.type)!;
+            const actionState = reducerFn(
+              state,
+              packet.value.payload,
+              namespace
+            );
+
+            printActionDebugInfo({
+              actionType: packet.value.type,
+              prevState: state,
+              nextState: actionState,
+              packet: packet.value,
+            });
+
             return {
               caughtError: false,
-              state: reducerFn(state, packet.value.payload, namespace),
+              state: actionState,
             };
           }
 
           const reducerFn = streamReducers[packet.origin];
+          const streamState = reducerFn(state, packet.value, namespace);
           return {
             caughtError: false,
-            state: reducerFn(state, packet.value, namespace),
+            state: streamState,
           };
         } catch (e) {
           errorSubject.next(e);
@@ -279,3 +294,29 @@ export const combineReducers = <State>(
     map(({ state }) => state)
   );
 };
+
+function printActionDebugInfo({
+  actionType,
+  prevState,
+  nextState,
+  packet,
+}: {
+  actionType: string;
+  prevState: any;
+  packet: any;
+  nextState: any;
+}) {
+  if (!rxBeachConfig.getProperty('reducerLogs')) {
+    return;
+  }
+
+  console.groupCollapsed(
+    `%caction %c${actionType}`,
+    'color: gray; font-weight: lighter',
+    'font-weight: bolder;'
+  );
+  console.log('%c prev state', 'color: #9E9E9E; font-weight: bold;', prevState);
+  console.log('%c action    ', 'color: #03A9F4; font-weight: bold;', packet);
+  console.log('%c next state', 'color: #4CAF50; font-weight: bold;', nextState);
+  console.groupEnd();
+}
