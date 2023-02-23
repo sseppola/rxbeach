@@ -48,6 +48,10 @@ export const persistentReducedStream = <State>(
     tag(name)
   );
 
+  if (module.hot) {
+    console.warn(`\nFOUND HOT HOT HOT MODULE!\n`);
+  }
+
   const stream = new ObservableState(name, source$, initialState);
 
   stateStreamRegistry.register(stream);

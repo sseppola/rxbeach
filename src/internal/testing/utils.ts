@@ -4,6 +4,14 @@ import * as rethrowErrorGloballyModule from '../rethrowErrorGlobally';
 import sinon, { SinonStub } from 'sinon';
 import { TestFn } from 'ava';
 
+export type Expect<T extends true> = T;
+
+export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <
+  T
+>() => T extends Y ? 1 : 2
+  ? true
+  : false;
+
 export const mockAction = <P = VoidPayload>(
   type: string,
   namespace?: string,

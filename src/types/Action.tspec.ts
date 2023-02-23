@@ -1,44 +1,82 @@
-import { AssertFalse, AssertTrue, Has, IsExact } from 'conditional-type-checks';
-import { Action, ActionWithPayload, ActionWithoutPayload } from './Action';
+import { IsExact } from 'conditional-type-checks';
+import { Equal, Expect } from '../internal/testing/utils';
+import { Action, ActionName } from './Action';
 
-type ActionWithPayload_extends_ActionWithoutPayload = AssertTrue<
-  Has<ActionWithPayload<unknown>, ActionWithoutPayload>
->;
+type InternalMeta = Action<ActionName>['meta'];
 
-type Action_dispatches_to_ActionWithPayload = AssertTrue<
-  IsExact<Action<string>, ActionWithPayload<string>>
->;
-type Action_dispatches_to_ActionWithoutPayload = AssertTrue<
-  IsExact<Action, ActionWithoutPayload>
->;
+type tests = [
+  // It creates the minimal action shape with only a type
+  Expect<
+    Equal<
+      Action<`[test] type`>,
+      { type: `[test] type`; meta: Readonly<InternalMeta> }
+    >
+  >,
+  // It enforces the action name shape
+  // @ts-expect-error
+  Action<`test type`>,
 
-// Typescript does expansion of union types when they are generic arguments to
-// conditional types. This means that `Action<Foo | Bar>` is not the same as
-// `ActionWithPayload<Foo | Bar>`, but `ActionWithPayload<Foo> |
-// ActionWithPayload<Bar>`
-// This is not what we want for RxBeach, but here we at least document how TS
-// actually treats union types for actions.
+  // It accepts a payload
+  Expect<
+    Equal<
+      Action<`[test] payload`, { two: 2 }>,
+      {
+        type: `[test] payload`;
+        payload: { two: 2 };
+        meta: Readonly<InternalMeta>;
+      }
+    >
+  >,
 
-type Action_expands_union_types1a = AssertTrue<
-  IsExact<Action<boolean>, ActionWithPayload<true> | ActionWithPayload<false>>
->;
-type Action_expands_union_types1b = AssertTrue<
-  IsExact<Action<boolean>, ActionWithPayload<boolean>>
->;
+  // It allows any kind of payload
+  Expect<
+    Equal<
+      Action<`[test] payload`, 2>,
+      { type: `[test] payload`; payload: 2; meta: Readonly<InternalMeta> }
+    >
+  >,
 
-type Action_expands_union_types2a = AssertTrue<
-  IsExact<Action<Enum>, ActionWithPayload<Enum.A> | ActionWithPayload<Enum.B>>
->;
-type Action_expands_union_types2b = AssertTrue<
-  IsExact<Action<Enum>, ActionWithPayload<Enum>>
->;
+  // It accepts a payload and metadata
+  Expect<
+    Equal<
+      Action<`[test] metadata`, { asd: 'asd' }, { createdAt: Date }>,
+      {
+        type: `[test] metadata`;
+        payload: { asd: 'asd' };
+        meta: Readonly<InternalMeta & { createdAt: Date }>;
+      }
+    >
+  >,
 
-type Action_Expands_union_types3a = AssertFalse<
-  IsExact<Action<Foo | Bar>, ActionWithPayload<Foo> | ActionWithPayload<Bar>>
->;
-type Action_Expands_union_types3b = AssertTrue<
-  IsExact<Action<Foo | Bar>, ActionWithPayload<Foo | Bar>>
->;
+  // it enforces payload as a record
+  // @ts-expect-error
+  Action<`[test] metadata`, { asd: 'asd' }, number>,
+
+  // It expands union types
+  Expect<
+    Equal<
+      Action<`[test] union payload`, boolean>,
+      | Action<`[test] union payload`, true>
+      | Action<`[test] union payload`, false>
+    >
+  >,
+
+  // It expands union types from enums
+  Expect<
+    Equal<
+      Action<`[test] enum union`, Enum>,
+      Action<`[test] enum union`, Enum.A> | Action<`[test] enum union`, Enum.B>
+    >
+  >,
+
+  // It expands inline union types
+  Expect<
+    Equal<
+      Action<`[test] inline union`, Foo | Bar>,
+      Action<`[test] inline union`, Foo> | Action<`[test] inline union`, Bar>
+    >
+  >
+];
 
 enum Enum {
   A,

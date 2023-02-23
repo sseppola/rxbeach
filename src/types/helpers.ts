@@ -1,11 +1,12 @@
 import { Observable } from 'rxjs';
-import { ActionCreatorWithPayload } from './ActionCreator';
-import { UnknownAction } from '../internal/types';
+import { Action, ActionName } from './Action';
 
-export type ActionStream = Observable<UnknownAction>;
+export type ActionStream<Type extends ActionName, Payload, Meta> = Observable<
+  Action<Type, Payload, Meta>
+>;
 
-export type ActionDispatcher = (
-  action: UnknownAction,
+export type ActionDispatcher<Type extends ActionName, Payload, Meta> = (
+  action: Action<Type, Payload, Meta>,
   namespace?: string
 ) => void;
 
@@ -16,5 +17,4 @@ export type ActionDispatcher = (
  * type Payload = ExtractPayload<typeof myAction>;
  * ```
  */
-export type ExtractPayload<ActionType extends ActionCreatorWithPayload<any>> =
-  ReturnType<ActionType>['payload'];
+// export type ExtractPayload<ActionType<T, P, M> extends Action<T, P, M>> = ReturnType<ActionType>['payload'];

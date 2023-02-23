@@ -1,26 +1,14 @@
 export type VoidPayload = void;
+export type ActionName = `[${string}] ${string}`;
 
-type Meta = {
-  readonly namespace?: string;
+type InternalMeta = {
+  namespace?: string;
 };
 
-export type ActionWithoutPayload = {
-  readonly type: string;
-  readonly meta: Meta;
-};
-
-export type ActionWithPayload<Payload> = ActionWithoutPayload & {
-  readonly payload: Payload;
-};
-
-/**
- * A conditional type that dispatches between `ActionWithPayload` and
- * `ActionWithoutPayload` by comparing the `Payload` type to `VoidPayload`
- *
- * Without a generic type, this defaults to `ActionWithoutPayload`.
- *
- * @template `Payload` - The payload type to dispatch on
- */
-export type Action<Payload = VoidPayload> = [Payload] extends [VoidPayload]
-  ? ActionWithoutPayload
-  : ActionWithPayload<Payload>;
+export type Action<
+  Type extends ActionName,
+  Payload = undefined,
+  Metadata extends Record<string, any> | undefined = {}
+> = Payload extends {}
+  ? { type: Type; payload: Payload; meta: Readonly<Metadata & InternalMeta> }
+  : { type: Type; meta: Readonly<Metadata & InternalMeta> };

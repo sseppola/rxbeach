@@ -3,11 +3,7 @@ import { actionCreator } from './actionCreator';
 
 type Payload = { num: number };
 const myAction = actionCreator<Payload>('[test] three');
-const action = myAction({ num: 3 }) as {
-  type: string;
-  payload: Payload;
-  meta: { namespace?: string };
-};
+const action = myAction({ num: 3 });
 type AlternativePayload = { text: string };
 const unionAction = actionCreator<Payload | AlternativePayload>('[test] union');
 const union1 = unionAction({ num: 4 });

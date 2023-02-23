@@ -1,19 +1,15 @@
 import { Subject } from 'rxjs';
-import { UnknownAction } from './internal';
-import { ActionDispatcher, ActionStream } from './types/helpers';
 import { tag } from 'rxjs-spy/operators';
 import { share } from 'rxjs/operators';
 import { _namespaceAction } from './namespace';
+import { Action, ActionName } from './types/Action';
 
-const actionSubject$ = new Subject<UnknownAction>();
+const actionSubject$ = new Subject<Action<ActionName, any>>();
 
 /**
  * The main action stream for RxBeach
  */
-export const action$: ActionStream = actionSubject$.pipe(
-  tag('action$'),
-  share()
-);
+export const action$ = actionSubject$.pipe(tag('action$'), share());
 
 /**
  * Dispatch an action to the action stream
@@ -23,7 +19,10 @@ export const action$: ActionStream = actionSubject$.pipe(
  * @param action The action to dispatch to action$
  * @param namespace Optional namespace to add to the action
  */
-export const dispatchAction: ActionDispatcher = (action, namespace) => {
+export const dispatchAction = <Type extends ActionName, Payload, Meta>(
+  action: Action<Type, Payload, Meta>,
+  namespace: string
+) => {
   if (namespace === undefined) {
     actionSubject$.next(action);
   } else {

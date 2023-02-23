@@ -1,5 +1,3 @@
-import { ActionWithPayload, ActionWithoutPayload } from '../types/Action';
-
 export { VoidPayload } from '../types/Action';
 
 /**
@@ -9,7 +7,11 @@ export { VoidPayload } from '../types/Action';
  * want to extract a possible `payload` from an action you don't know anything
  * about.
  */
-export type UnknownAction = ActionWithoutPayload & { payload?: unknown };
+// export type UnknownAction = ActionWithoutPayload & { payload?: unknown };
+// export type UnknownAction<Payload = unknown> =
+//   | ActionWithPayload<Payload>
+//   | ActionWithoutPayload;
+// export type UnknownAction<Payload, Action extends ActionWithPayload<Payload> | ActionWithoutPayload> = Extract<Action, { payload: infer Payload; }> ActionWithoutPayload & { payload?: unknown };
 
 export interface ActionCreatorCommon {
   readonly type: string;
@@ -21,10 +23,10 @@ export interface ActionCreatorCommon {
  * This type allows for inferring overlap of the payload type between multiple
  * action creators with different payloads.
  */
-export interface UnknownActionCreatorWithPayload<Payload>
-  extends ActionCreatorCommon {
-  (payload?: any): ActionWithPayload<Payload>;
-}
+// export interface UnknownActionCreatorWithPayload<Payload>
+//   extends ActionCreatorCommon {
+//   (payload?: any): Action<Payload>;
+// }
 
 /**
  * Helper type for action creator where you need to handle both action creators
@@ -34,6 +36,6 @@ export interface UnknownActionCreatorWithPayload<Payload>
  * and has return type `UnknownAction`. It's useful when you need to define a
  * generic action creator that might create actions with or without actions.
  */
-export interface UnknownActionCreator extends ActionCreatorCommon {
-  (payload?: any): UnknownAction;
-}
+// export interface UnknownActionCreator extends ActionCreatorCommon {
+//   (payload?: any): UnknownAction;
+// }

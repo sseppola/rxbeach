@@ -1,23 +1,10 @@
-import { ActionWithPayload, ActionWithoutPayload } from './Action';
-import { ActionCreatorCommon, VoidPayload } from '../internal/types';
+import { Action, ActionName } from './Action';
 
-export interface ActionCreatorWithoutPayload extends ActionCreatorCommon {
-  (): ActionWithoutPayload;
+export interface ActionCreator<
+  Type extends ActionName,
+  Payload = undefined,
+  Meta extends Record<string, any> | undefined = undefined
+> {
+  (payload: Payload): Action<Type, Payload, Meta>;
+  readonly type: Type;
 }
-
-export interface ActionCreatorWithPayload<Payload> extends ActionCreatorCommon {
-  (payload: Payload): ActionWithPayload<Payload>;
-}
-
-/**
- * A conditional type that dispatches between `ActionCreatorWithPayload` and
- * `ActionCreatorWithoutPayload` by comparing the `Payload` type to
- * `VoidPayload`
- *
- * Without a generic type, this defaults to `ActionCreatorWithoutPayload`.
- *
- * @template `Payload` - The payload type to dispatch on
- */
-export type ActionCreator<Payload = VoidPayload> = Payload extends VoidPayload
-  ? ActionCreatorWithoutPayload
-  : ActionCreatorWithPayload<Payload>;

@@ -1,15 +1,6 @@
 export { action$, dispatchAction } from './action$';
 
-export {
-  ActionWithoutPayload,
-  ActionWithPayload,
-  Action,
-} from './types/Action';
-export {
-  ActionCreatorWithoutPayload,
-  ActionCreatorWithPayload,
-  ActionCreator,
-} from './types/ActionCreator';
+export { Action } from './types/Action';
 export {
   ActionStream,
   ActionDispatcher,
